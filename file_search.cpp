@@ -8,24 +8,27 @@ bool FileSearch::SearchFile(std::string search, std::string file_name)
 
     if (file_reader.is_open())
     {
+        to_lower(search);
         std::string line;
         std::getline(file_reader, line);
 
         while (!file_reader.eof())
         {
-            // size_t found = line.find(search);
+            to_lower(line);
 
-            // if (found != std::string::npos)
-            // {
-            //     return true;
-            // }
+            size_t found = line.find(search);
 
-            auto pos = strcasestr(line.c_str(), search.c_str());
-
-            if (pos != nullptr)
+            if (found != std::string::npos)
             {
                 return true;
             }
+
+            // auto pos = strcasestr(line.c_str(), search.c_str());
+
+            // if (pos != nullptr)
+            // {
+            //     return true;
+            // }
 
             std::getline(file_reader, line);
         }
@@ -55,4 +58,12 @@ std::string FileSearch::SearchCurrentFolder(std::string search)
     }
 
     return file_names;
+}
+
+void FileSearch::to_lower(std::string& str)
+{
+    for (auto& ch : str)
+    {
+        ch = std::tolower(ch);
+    }
 }
