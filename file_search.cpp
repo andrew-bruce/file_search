@@ -1,10 +1,17 @@
 #include "file_search.h"
 
-bool FileSearch::SearchFile(std::string search, std::string file_name)
+bool FileSearch::SearchFile(std::string& search, std::string& file_name)
 {
     std::fstream file_reader;
 
     file_reader.open(file_name, std::fstream::in);
+
+    std::string ext = file_name.substr(file_name.find_last_of(".") + 1);
+
+    if (ext == "pdf")
+    {
+        return SearchPdf(search, file_name);
+    }
 
     if (file_reader.is_open())
     {
@@ -23,13 +30,6 @@ bool FileSearch::SearchFile(std::string search, std::string file_name)
                 return true;
             }
 
-            // auto pos = strcasestr(line.c_str(), search.c_str());
-
-            // if (pos != nullptr)
-            // {
-            //     return true;
-            // }
-
             std::getline(file_reader, line);
         }
     }
@@ -37,7 +37,7 @@ bool FileSearch::SearchFile(std::string search, std::string file_name)
     return false;
 }
 
-std::string FileSearch::SearchCurrentFolder(std::string search)
+std::string FileSearch::SearchCurrentFolder(std::string& search)
 {
     char current_path[FILENAME_MAX];
     std::string file_names;
@@ -59,6 +59,42 @@ std::string FileSearch::SearchCurrentFolder(std::string search)
 
     return file_names;
 }
+
+bool FileSearch::SearchPdf(const std::string& search, const std::string& pdfFilePath)
+{
+    // Command to execute pdftotext on the provided PDF file
+    std::string command = "pdftotext " + pdfFilePath + " -";
+
+    // Open a pipe to capture the output of the command
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe)
+    {
+        return "Error executing command.";
+    }
+
+    // Read and capture the output of the command
+    std::string extractedText;
+    char buffer[128];
+    while (fgets(buffer, sizeof(buffer), pipe) != NULL)
+    {
+        extractedText += buffer;
+    }
+
+    // Close the pipe
+    pclose(pipe);
+
+    to_lower(extractedText);
+
+    size_t found = extractedText.find(search);
+
+    if (found != std::string::npos)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 
 void FileSearch::to_lower(std::string& str)
 {

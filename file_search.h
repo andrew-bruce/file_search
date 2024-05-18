@@ -1,11 +1,9 @@
-#define _GNU_SOURCE
 #include <iostream>
 #include <fstream>
-#include <cstring>
 #include <string>
 #include <filesystem>
-#include <stdio.h>
-#include "shlwapi.h"
+#include <tesseract/baseapi.h>
+#include <leptonica/allheaders.h>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -23,6 +21,7 @@ class FileSearch
     void to_lower(std::string& str);
     public:
     FileSearch() {}
-    bool SearchFile(std::string search, std::string file_path);
-    std::string SearchCurrentFolder(std::string search);
+    bool SearchFile(std::string& search, std::string& file_path);
+    std::string SearchCurrentFolder(std::string& search);
+    bool SearchPdf(const std::string& search, const std::string& pdfFilePath);
 };
