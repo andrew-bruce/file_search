@@ -1,41 +1,5 @@
 #include "file_search.h"
 
-bool FileSearch::SearchFile(std::string& search, std::string& file_name)
-{
-    std::fstream file_reader;
-
-    file_reader.open(file_name, std::fstream::in);
-
-    std::string ext = file_name.substr(file_name.find_last_of(".") + 1);
-
-    if (ext == "pdf")
-    {
-        return SearchPdf(search, file_name);
-    }
-
-    if (file_reader.is_open())
-    {
-        to_lower(search);
-        std::string line;
-        std::getline(file_reader, line);
-
-        while (!file_reader.eof())
-        {
-            to_lower(line);
-
-            size_t found = line.find(search);
-
-            if (found != std::string::npos)
-            {
-                return true;
-            }
-
-            std::getline(file_reader, line);
-        }
-    }
-
-    return false;
-}
 
 std::string FileSearch::SearchCurrentFolder(std::string& search)
 {
@@ -51,7 +15,14 @@ std::string FileSearch::SearchCurrentFolder(std::string& search)
     {
         std::string file_name = dir_entry.path().string();
 
-        if (!dir_entry.is_directory() && SearchFile(search, file_name))
+        if (dir_entry.is_directory())
+        {
+            continue;
+        }
+
+        std::string ext = file_name.substr(file_name.find_last_of(".") + 1);
+
+        if ((ext == "pdf" && SearchPdf(search, file_name)) || SearchPlanTextFile(search, file_name))
         {
             file_names.append(dir_entry.path().string() + '\n');
         }
@@ -60,7 +31,40 @@ std::string FileSearch::SearchCurrentFolder(std::string& search)
     return file_names;
 }
 
-bool FileSearch::SearchPdf(const std::string& search, const std::string& pdfFilePath)
+bool FileSearch::SearchPlanTextFile(std::string& search, std::string& file_name)
+{
+    std::fstream file_reader;
+
+    file_reader.open(file_name, std::fstream::in);
+
+    std::string ext = file_name.substr(file_name.find_last_of(".") + 1);
+
+    if (ext == "pdf")
+    {
+        return SearchPdf(search, file_name);
+    }
+
+    if (file_reader.is_open())
+    {
+        ToLower(search);
+        std::string line;
+        std::getline(file_reader, line);
+
+        while (!file_reader.eof())
+        {
+            if (IsInTextCaseInsensitive(search, line))
+            {
+                return true;
+            }
+
+            std::getline(file_reader, line);
+        }
+    }
+
+    return false;
+}
+
+bool FileSearch::SearchPdf(std::string& search, std::string& pdfFilePath)
 {
     // Command to execute pdftotext on the provided PDF file
     std::string command = "pdftotext " + pdfFilePath + " -";
@@ -82,12 +86,11 @@ bool FileSearch::SearchPdf(const std::string& search, const std::string& pdfFile
 
     // Close the pipe
     pclose(pipe);
-
-    to_lower(extractedText);
+    ToLower(extractedText);
 
     size_t found = extractedText.find(search);
 
-    if (found != std::string::npos)
+    if (IsInTextCaseInsensitive(search, extractedText))
     {
         return true;
     }
@@ -95,8 +98,32 @@ bool FileSearch::SearchPdf(const std::string& search, const std::string& pdfFile
     return false;
 }
 
+bool FileSearch::IsInTextCaseInsensitive(std::string& search, std::string& text)
+{
+#ifdef _WIN32
+    ToLower(text);
 
-void FileSearch::to_lower(std::string& str)
+    size_t found = text.find(search);
+
+    if (found != std::string::npos)
+    {
+        return true;
+    }
+#endif
+
+#ifdef linux
+    auto pos = strcasestr(text.c_str(), search.c_str());
+
+    if (pos != nullptr)
+    {
+        return true;
+    }
+#endif
+
+    return false;
+}
+
+void FileSearch::ToLower(std::string& str)
 {
     for (auto& ch : str)
     {
