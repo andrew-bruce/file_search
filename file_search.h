@@ -20,9 +20,9 @@ class FileSearch
     private:
     void ToLower(std::string& str);
     bool IsInTextCaseInsensitive(std::string& search, std::string& text);
+    bool SearchPlanTextFile(std::string& search, std::string& file_path);
+    bool SearchPdf(std::string& search, std::string& file_path);
     public:
     FileSearch() {}
-    bool SearchPlanTextFile(std::string& search, std::string& file_path);
-    std::string SearchCurrentFolder(std::string& search);
-    bool SearchPdf(std::string& search, std::string& pdfFilePath);
+    std::string SearchFolder(std::string& search, std::string& folder);
 };

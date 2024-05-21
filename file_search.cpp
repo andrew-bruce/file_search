@@ -1,17 +1,11 @@
 #include "file_search.h"
 
 
-std::string FileSearch::SearchCurrentFolder(std::string& search)
+std::string FileSearch::SearchFolder(std::string& search, std::string& folder)
 {
-    char current_path[FILENAME_MAX];
     std::string file_names;
 
-    if (!GetCurrentDir(current_path, sizeof(current_path)))
-    {
-        return "Error: Could not load current directory";
-    }
-
-    for (const auto& dir_entry : std::filesystem::recursive_directory_iterator(current_path))
+    for (const auto& dir_entry : std::filesystem::recursive_directory_iterator(folder))
     {
         std::string file_name = dir_entry.path().string();
 
@@ -64,10 +58,10 @@ bool FileSearch::SearchPlanTextFile(std::string& search, std::string& file_name)
     return false;
 }
 
-bool FileSearch::SearchPdf(std::string& search, std::string& pdfFilePath)
+bool FileSearch::SearchPdf(std::string& search, std::string& file_path)
 {
     // Command to execute pdftotext on the provided PDF file
-    std::string command = "pdftotext " + pdfFilePath + " -";
+    std::string command = "pdftotext " + file_path + " -";
 
     // Open a pipe to capture the output of the command
     FILE* pipe = popen(command.c_str(), "r");
