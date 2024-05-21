@@ -54,11 +54,12 @@ int main(int argc, char* argv[])
     else
     {
         // Check if the folder exists
-        if (!std::filesystem::exists(folder) && std::filesystem::is_directory(folder))
+        if (!std::filesystem::exists(folder) || !std::filesystem::is_directory(folder))
         {
             std::cout << "Cannot find specified folder \"" << folder << "\"\n"
-                << "Please check folder name and include full path" << std::endl;
+                << "Please check folder name and include full path\n" << "Note that the path name is case sensitive" << std::endl;
 
+            return 0;
         }
     }
 
