@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring>
 #include <filesystem>
-#include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
 
 #ifdef _WIN32
@@ -24,5 +24,5 @@ class FileSearch
     bool SearchPdf(std::string& search, std::string& file_path);
     public:
     FileSearch() {}
-    std::string SearchFolder(std::string& search, std::string& folder);
+    std::string SearchFolder(std::string& search, std::string& folder, bool& nameOnly, bool& contentOnly);
 };

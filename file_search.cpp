@@ -1,7 +1,7 @@
 #include "file_search.h"
 
 
-std::string FileSearch::SearchFolder(std::string& search, std::string& folder)
+std::string FileSearch::SearchFolder(std::string& search, std::string& folder, bool& nameOnly, bool& contentOnly)
 {
     std::string file_names;
 
@@ -10,6 +10,17 @@ std::string FileSearch::SearchFolder(std::string& search, std::string& folder)
         std::string file_name = dir_entry.path().string();
 
         if (dir_entry.is_directory())
+        {
+            continue;
+        }
+
+        if (!contentOnly && IsInTextCaseInsensitive(search, file_name))
+        {
+            file_names.append(dir_entry.path().string() + '\n');
+            continue;
+        }
+
+        if (nameOnly)
         {
             continue;
         }
